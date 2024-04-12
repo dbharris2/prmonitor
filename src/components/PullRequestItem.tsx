@@ -129,9 +129,6 @@ export const PullRequestItem = observer(
 );
 
 function itemBgColor(pr: EnrichedPullRequest): string {
-  if (pr.isMerged) {
-    return "#CBC3E3";
-  }
   if (pr.draft) {
     return "#fff";
   }

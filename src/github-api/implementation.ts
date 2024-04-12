@@ -1,5 +1,64 @@
-import { GitHubApi } from "./api";
+import { CheckStatus, GitHubApi, ReviewDecision } from "./api";
 import { request } from "@octokit/request";
+
+const PR_FRAGMENT = `... on PullRequest {
+  additions
+  author {
+    login
+    avatarUrl
+  }
+  changedFiles
+  deletions
+  isDraft
+  merged
+  number
+  repository {
+    nameWithOwner
+  }
+  reviewDecision
+  reviewRequests(first: 10) {
+    nodes {
+      requestedReviewer {
+        ... on User {
+          name
+          login
+        }
+      }
+    }
+  }
+  state
+  statusCheckRollup {
+    state
+  }
+  title
+  totalCommentsCount
+  updatedAt
+  url
+}`;
+
+export type PullRequestNode = {
+  additions: number;
+  author: { login: string; avatarUrl: string };
+  changedFiles: number;
+  deletions: number;
+  isDraft: boolean;
+  merged: boolean;
+  number: number;
+  repository: { nameWithOwner: string };
+  reviewDecision: ReviewDecision;
+  reviewRequests: { nodes: { requestedReviewer: { login: string } }[] };
+  statusCheckRollup: { state: CheckStatus };
+  title: string;
+  totalCommentsCount: number;
+  updatedAt: string;
+  url: string;
+  viewer: { login: string };
+};
+
+export type PullRequestRet = {
+  prs: PullRequestNode[];
+  viewer: { login: string };
+};
 
 export function buildGitHubApi(token: string): GitHubApi {
   return {
@@ -13,130 +72,108 @@ export function buildGitHubApi(token: string): GitHubApi {
       });
       return response.data;
     },
-    async searchPullRequests(query): Promise<any> {
-      const response = await request(`GET /search/issues`, {
-        headers: {
-          authorization: `Bearer ${token}`,
-        },
-        q: `is:pr ${query}`,
-        org: "octokit",
-        type: "private",
-      });
-      return response.data.items;
-    },
-    async loadPullRequestDetails(pr): Promise<any> {
-      const response = await request(
-        `GET /repos/${pr.repo.owner}/${pr.repo.name}/pulls/${pr.number}`,
-        {
-          headers: {
-            authorization: `Bearer ${token}`,
-          },
-          org: "octokit",
-          type: "private",
-        }
-      );
-      return response.data;
-    },
-    async loadPullRequestChangeSummary(pr): Promise<any> {
-      const response = await request(
-        `GET /repos/${pr.repo.owner}/${pr.repo.name}/pulls/${pr.number}/files`,
-        {
-          headers: {
-            authorization: `Bearer ${token}`,
-          },
-          org: "octokit",
-          type: "private",
-        }
-      );
-      return response.data;
-    },
-    async loadReviews(pr): Promise<any> {
-      const response = await request(
-        `GET /repos/${pr.repo.owner}/${pr.repo.name}/pulls/${pr.number}/reviews`,
-        {
-          headers: {
-            authorization: `Bearer ${token}`,
-          },
-          org: "octokit",
-          type: "private",
-        }
-      );
-      return response.data;
-    },
-    async loadComments(pr): Promise<any> {
-      const response = await request(
-        `GET /repos/${pr.repo.owner}/${pr.repo.name}/issues/${pr.number}/comments`,
-        {
-          headers: {
-            authorization: `Bearer ${token}`,
-          },
-          org: "octokit",
-          type: "private",
-        }
-      );
-      return response.data ?? [];
-    },
-    async loadReviewComments(pr): Promise<any> {
-      const response = await request(
-        `GET /repos/${pr.repo.owner}/${pr.repo.name}/pulls/${pr.number}/comments`,
-        {
-          headers: {
-            authorization: `Bearer ${token}`,
-          },
-          org: "octokit",
-          type: "private",
-        }
-      );
-      return response.data ?? [];
-    },
-    async loadIsMerged(pr): Promise<boolean> {
-      try {
-        const response = await request(
-          `GET /repos/${pr.repo.owner}/${pr.repo.name}/pulls/${pr.number}/merge`,
-          {
-            headers: {
-              authorization: `Bearer ${token}`,
-            },
-            org: "octokit",
-            type: "private",
-          }
-        );
-        return response.status === 204;
-      } catch (e) {
-        return false;
-      }
-    },
-    async loadPullRequestStatus(pr) {
+    async loadMyOpenPullRequests(): Promise<PullRequestRet> {
       const response = await request("POST /graphql", {
         headers: {
           authorization: `Bearer ${token}`,
         },
-        query: `query {
-          repository(owner: "${pr.repo.owner}", name: "${pr.repo.name}") {
-            pullRequest(number: ${pr.number}) {
-              reviewDecision
-              commits(last: 1) {
-                nodes {
-                  commit {
-                    statusCheckRollup {
-                      state
-                    }
-                  }
-                }
-              }
+        query: `query MyOpenPullRequests($qstr: String!) {
+          search(query: $qstr, type: ISSUE, first: 30) {
+            nodes {
+              ${PR_FRAGMENT}
             }
+          }
+          viewer {
+            login
           }
         }`,
         variables: {
           login: "octokit",
+          qstr: "author:@me is:pr is:open",
         },
       });
 
-      const pullRequest = response.data.data.repository.pullRequest;
       return {
-        reviewDecision: pullRequest.reviewDecision,
-        checkStatus:
-          pullRequest.commits.nodes?.[0]?.commit.statusCheckRollup?.state,
+        prs: response.data.data.search.nodes,
+        viewer: response.data.data.viewer,
+      };
+    },
+    async loadNeedsRevisionPullRequests(): Promise<PullRequestRet> {
+      const response = await request("POST /graphql", {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+        query: `query NeedsRevisionPullRequests($qstr: String!) {
+          search(query: $qstr, type: ISSUE, first: 30) {
+            nodes {
+              ${PR_FRAGMENT}
+            }
+          }
+          viewer {
+            login
+          }
+        }`,
+        variables: {
+          login: "octokit",
+          qstr: "-author:@me -is:draft is:open is:pr involves:@me -review:approved",
+        },
+      });
+
+      return {
+        prs: response.data.data.search.nodes,
+        viewer: response.data.data.viewer,
+      };
+    },
+    async loadToReviewPullRequests(): Promise<PullRequestRet> {
+      const response = await request("POST /graphql", {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+        query: `query ToReviewPullRequests($qstr: String!) {
+          search(query: $qstr, type: ISSUE, first: 30) {
+            nodes {
+              ${PR_FRAGMENT}
+            }
+          }
+          viewer {
+            login
+          }
+        }`,
+        variables: {
+          login: "octokit",
+          qstr: "-author:@me -is:draft is:open is:pr review-requested:@me -review:approved",
+        },
+      });
+
+      return {
+        prs: response.data.data.search.nodes,
+        viewer: response.data.data.viewer,
+      };
+    },
+    async loadMyMergedPullRequests(): Promise<PullRequestRet> {
+      const response = await request("POST /graphql", {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+        query: `query MyMergedPullRequests($qstr: String!) {
+          search(query: $qstr, type: ISSUE, first: 30) {
+            nodes {
+              ${PR_FRAGMENT}
+            }
+          }
+          viewer {
+            login
+          }
+        }`,
+        variables: {
+          login: "octokit",
+          qstr: "author:@me is:pr is:merged",
+        },
+      });
+
+      return {
+        prs: response.data.data.search.nodes,
+        viewer: response.data.data.viewer,
       };
     },
   };

@@ -1,16 +1,6 @@
-import { RestEndpointMethodTypes } from "@octokit/rest";
-import {
-  GitHubApi,
-  PullRequestReference,
-  PullRequestStatus,
-  RepoReference,
-} from "../../github-api/api";
-import {
-  Comment,
-  PullRequest,
-  Review,
-  ReviewState,
-} from "../../storage/loaded-state";
+import { GitHubApi } from "../../github-api/api";
+import { PullRequest } from "../../storage/loaded-state";
+import { PullRequestNode } from "../../github-api/implementation";
 import moment from "moment";
 
 export function testPRs(): Promise<PullRequest[]> {
@@ -248,149 +238,55 @@ export async function refreshOpenPullRequests(
   //   return testPRs();
   // }
 
-  // As long as a review is requested for you (even if changes have been requested), then it's reviewable
-  const reviewRequestedPullRequests = await githubApi.searchPullRequests(
-    `-author:@me -is:draft is:open -review:approved review-requested:@me`
-  );
-  const needsRevisionPullRequests = await githubApi.searchPullRequests(
-    `-author:@me -is:draft is:open review:changes_requested involves:@me`
-  );
-  const myPullRequests = await githubApi.searchPullRequests(
-    `author:@me is:open`
-  );
-  const myRecentlyMergedPullRequests = await githubApi.searchPullRequests(
-    `author:@me is:closed archived:false`
-  );
+  const { prs: myMergedPrs } = await githubApi.loadMyMergedPullRequests();
+  const { prs: myPrs, viewer } = await githubApi.loadMyOpenPullRequests();
+  const { prs: toReviewPrs } = await githubApi.loadToReviewPullRequests();
+  const { prs: needsRevisionPrs } =
+    await githubApi.loadNeedsRevisionPullRequests();
 
-  return Promise.all([
-    ...reviewRequestedPullRequests.map((pr) =>
-      updateCommentsAndReviews(githubApi, pr, true)
-    ),
-    // Remove PRs that needs revision but have a review requested of you
-    ...needsRevisionPullRequests
-      .filter(
-        (nrpr) =>
-          !reviewRequestedPullRequests.find(
-            (rrpr) => nrpr.number === rrpr.number
-          )
+  return [
+    ...toReviewPrs.filter((pr) =>
+      pr.reviewRequests.nodes.find(
+        ({ requestedReviewer }) => requestedReviewer.login === viewer.login
       )
-      .map((pr) => updateCommentsAndReviews(githubApi, pr)),
-    ...myPullRequests.map((pr) =>
-      updateCommentsAndReviews(githubApi, pr, true)
     ),
-    ...myRecentlyMergedPullRequests
-      .filter((pr) => moment().diff(moment(pr.updated_at), "days") < 1)
-      .map((pr) => updateCommentsAndReviews(githubApi, pr)),
-  ]);
-}
-
-async function updateCommentsAndReviews(
-  githubApi: GitHubApi,
-  rawPullRequest: RestEndpointMethodTypes["search"]["issuesAndPullRequests"]["response"]["data"]["items"][number],
-  isReviewRequested = false
-): Promise<PullRequest> {
-  const repo = extractRepo(rawPullRequest);
-  const pr: PullRequestReference = {
-    repo,
-    number: rawPullRequest.number,
-  };
-  const [
-    freshChangeSummary,
-    freshReviews,
-    freshComments,
-    freshReviewComments,
-    pullRequestStatus,
-    isMerged,
-  ] = await Promise.all([
-    githubApi.loadPullRequestChangeSummary(pr),
-    githubApi.loadReviews(pr).then((reviews) =>
-      reviews.map((review) => ({
-        authorLogin: review.user ? review.user.login : "",
-        state: review.state as ReviewState,
-        submittedAt: review.submitted_at,
-      }))
+    ...needsRevisionPrs.filter(
+      (pr) =>
+        pr.reviewDecision === "CHANGES_REQUESTED" &&
+        pr.reviewRequests.nodes.find(
+          ({ requestedReviewer }) => requestedReviewer.login === viewer.login
+        )
     ),
-    githubApi.loadComments(pr).then((comments) =>
-      comments.map((comment) => ({
-        authorLogin: comment.user ? comment.user.login : "",
-        createdAt: comment.created_at,
-      }))
+    ...myPrs,
+    ...myMergedPrs.filter(
+      (pr) => moment().diff(moment(pr.updatedAt), "days") < 1
     ),
-    githubApi.loadReviewComments(pr).then((comments) =>
-      comments.map((comment) => ({
-        authorLogin: comment.user ? comment.user.login : "",
-        createdAt: comment.created_at,
-      }))
-    ),
-    githubApi.loadPullRequestStatus(pr),
-    githubApi.loadIsMerged(pr),
-  ]);
-
-  return pullRequestFromResponse(
-    rawPullRequest,
-    freshChangeSummary,
-    freshReviews,
-    freshComments,
-    freshReviewComments,
-    isReviewRequested,
-    pullRequestStatus,
-    isMerged
-  );
-}
-
-function pullRequestFromResponse(
-  response: RestEndpointMethodTypes["search"]["issuesAndPullRequests"]["response"]["data"]["items"][number],
-  changeSummary: any,
-  reviews: Review[],
-  comments: Comment[],
-  reviewComments: Comment[],
-  reviewRequested: boolean,
-  status: PullRequestStatus,
-  isMerged: boolean
-): PullRequest {
-  const repo = extractRepo(response);
-  return {
-    nodeId: response.node_id,
-    htmlUrl: response.html_url,
-    repoOwner: repo.owner,
-    repoName: repo.name,
-    pullRequestNumber: response.number,
-    updatedAt: response.updated_at,
-    author: response.user && {
-      login: response.user.login,
-      avatarUrl: response.user.avatar_url,
+  ].map((node: PullRequestNode, index: { toString: () => any }) => ({
+    author: node.author && {
+      avatarUrl: node.author.avatarUrl,
+      login: node.author.login,
     },
     changeSummary: {
-      changedFiles: changeSummary.length,
-      additions: changeSummary.reduce(
-        (total: number, curr: any) => total + curr.additions,
-        0
-      ),
-      deletions: changeSummary.reduce(
-        (total: number, curr: any) => total + curr.deletions,
-        0
-      ),
+      additions: node.additions,
+      changedFiles: node.changedFiles,
+      deletions: node.deletions,
     },
-    title: response.title,
-    draft: response.draft,
-    reviewRequested,
-    reviews,
-    comments: [...comments, ...reviewComments],
-    reviewDecision: status.reviewDecision,
-    checkStatus: status.checkStatus,
-    isMerged,
-  };
-}
-
-function extractRepo(
-  response: RestEndpointMethodTypes["search"]["issuesAndPullRequests"]["response"]["data"]["items"][number]
-): RepoReference {
-  const urlParts = response.repository_url.split("/");
-  if (urlParts.length < 2) {
-    throw new Error(`Unexpected repository_url: ${response.repository_url}`);
-  }
-  return {
-    owner: urlParts[urlParts.length - 2],
-    name: urlParts[urlParts.length - 1],
-  };
+    checkStatus: node.statusCheckRollup?.state ?? "SUCCESS",
+    comments: Array.from({ length: node.totalCommentsCount }, () => ({
+      authorLogin: "",
+      createdAt: "",
+    })),
+    draft: node.isDraft,
+    htmlUrl: node.url,
+    isMerged: node.merged,
+    nodeId: index.toString(),
+    pullRequestNumber: node.number,
+    repoName: "",
+    repoOwner: node.repository.nameWithOwner,
+    reviewDecision: node.reviewDecision,
+    reviewRequested: false,
+    reviews: [],
+    title: node.title,
+    updatedAt: node.updatedAt,
+  }));
 }
