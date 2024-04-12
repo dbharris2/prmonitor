@@ -103,10 +103,15 @@ export const PullRequestItem = observer(
             </div>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <div style={{ display: "flex", gap: "8px", flexGrow: 1 }}>
-              <Repo>
-                {pullRequest.repoOwner}/{pullRequest.repoName}
-              </Repo>
+            <div
+              style={{
+                display: "flex",
+                gap: "8px",
+                flexGrow: 1,
+                flexWrap: "wrap",
+              }}
+            >
+              <Repo>{pullRequest.repoOwner}</Repo>
               <div style={{ display: "flex", gap: "8px" }}>
                 <LinesAdded>+{pullRequest.changeSummary.additions}</LinesAdded>
                 <LinesDeleted>
@@ -119,6 +124,7 @@ export const PullRequestItem = observer(
                   <CommentIcon /> {pullRequest.comments.length}
                 </div>
               </div>
+              <ReviewerAvatars pullRequest={pullRequest} />
             </div>
             <PullRequestStatus pullRequest={pullRequest} />
           </div>
@@ -128,10 +134,25 @@ export const PullRequestItem = observer(
   }
 );
 
-function itemBgColor(pr: EnrichedPullRequest): string {
-  if (pr.isMerged) {
-    return "#CBC3E3";
+const ReviewerAvatars = ({
+  pullRequest,
+}: {
+  pullRequest: EnrichedPullRequest;
+}) => {
+  if (!pullRequest.reviewRequests || pullRequest.reviewRequests.length === 0) {
+    return null;
   }
+
+  return (
+    <div style={{ display: "flex", flexDirection: "row", gap: "4px" }}>
+      {pullRequest.reviewRequests?.map(({ avatarUrl }, index) => (
+        <AuthorAvatar key={index} src={avatarUrl} />
+      ))}
+    </div>
+  );
+};
+
+function itemBgColor(pr: EnrichedPullRequest): string {
   if (pr.draft) {
     return "#fff";
   }

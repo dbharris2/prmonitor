@@ -5,18 +5,6 @@ import { EnrichedPullRequest } from "../filtering/enriched-pull-request";
 import { PullRequestState } from "../filtering/status";
 import { CheckStatus } from "../github-api/api";
 
-const UNREVIEWED = (
-  <Badge pill bg="danger" key="unreviewed">
-    Unreviewed
-  </Badge>
-);
-
-const AUTHOR_REPLIED = (
-  <Badge pill bg="secondary" key="author-replied">
-    Author replied
-  </Badge>
-);
-
 const DRAFT = (
   <Badge pill bg="dark" key="draft">
     Draft
@@ -53,7 +41,7 @@ const CHECK_STATUS_PENDING = (
 
 const CHANGES_REQUESTED = (
   <Badge pill bg="danger" key="changes-requested">
-    Changes requested
+    Author's Queue
   </Badge>
 );
 
@@ -72,7 +60,6 @@ export const PullRequestStatus = observer(
           style={{
             alignItems: "center",
             display: "flex",
-            flexWrap: "wrap",
             gap: "4px",
             justifyContent: "flex-end",
             maxWidth: "40%",
@@ -116,14 +103,8 @@ function getIncomingStateBadges(state: PullRequestState): JSX.Element[] {
 
   if (state.draft) {
     badges.push(DRAFT);
-  } else if (state.newReviewRequested) {
-    badges.push(UNREVIEWED);
   } else if (state.changesRequested) {
     badges.push(CHANGES_REQUESTED);
-  }
-
-  if (state.authorResponded) {
-    badges.push(AUTHOR_REPLIED);
   }
 
   badges.push(...getCheckStatusBadge(state.checkStatus));

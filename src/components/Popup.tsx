@@ -93,7 +93,7 @@ export const Popup = observer((props: PopupProps) => {
                 <Tab
                   title={
                     <>
-                      Needs Revision{" "}
+                      Author's Queue{" "}
                       {prs?.needsRevision && (
                         <Badge pill bg="secondary">
                           {prs.needsRevision.length}
@@ -144,7 +144,7 @@ function headerForFilter(filter: Filter): string {
     case Filter.NEEDS_REVIEW:
       return "Needs Review";
     case Filter.NEEDS_REVISION:
-      return "Needs Revision";
+      return "Author's Queue";
     case Filter.MINE:
       return "My PRs";
     case Filter.RECENTLY_MERGED:

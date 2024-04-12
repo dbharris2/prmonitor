@@ -70,11 +70,7 @@ export interface PullRequest {
    * Whether a review is requested from the current user.
    */
   reviewRequested: boolean;
-  /**
-   * List of reviewers who are yet to review the PR (or who were requested to review again).
-   */
-  // TODO: Make this required in September 2019.
-  requestedReviewers?: string[];
+  reviewRequests: { avatarUrl: string; login: string }[];
   requestedTeams?: string[];
   reviews: Review[];
   comments: Comment[];
