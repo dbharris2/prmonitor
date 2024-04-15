@@ -5,7 +5,7 @@ import { EnrichedPullRequest } from "../filtering/enriched-pull-request";
 import {
   Filter,
   FilteredPullRequests,
-  filterPullRequests
+  filterPullRequests,
 } from "../filtering/filters";
 import { LoadedState } from "../storage/loaded-state";
 
@@ -94,10 +94,7 @@ export class Core {
     if (!lastCheck || !lastCheck.userLogin) {
       return null;
     }
-    return filterPullRequests(
-      lastCheck.userLogin,
-      lastCheck.openPullRequests,
-    );
+    return filterPullRequests(lastCheck.userLogin, lastCheck.openPullRequests);
   }
 
   @computed

@@ -1,36 +1,13 @@
-import styled from "@emotion/styled";
+import React, { ButtonHTMLAttributes, memo } from "react";
 
-const Button = styled.button`
-  color: #000;
-  background-color: #fff;
-  border: none;
-  padding: 4px;
-  margin: 0 4px;
-  border-radius: 8px;
-  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  outline: none !important;
-  font-size: 1em;
+const Button = (props: ButtonHTMLAttributes<HTMLButtonElement>) => (
+  <button
+    className="cursor-pointer items-center rounded-lg border-none bg-slate-200 p-1 outline-none hover:bg-slate-400 active:bg-slate-600"
+    type="button"
+    {...props}
+  >
+    {props.children}
+  </button>
+);
 
-  &:hover:enabled {
-    background-color: #2ee59d;
-    box-shadow: 0px 5px 10px rgba(46, 229, 157, 0.4);
-    color: #fff;
-  }
-
-  &:disabled {
-    color: #999;
-  }
-`;
-
-export const SmallButton = styled(Button)`
-  padding: 0 6px;
-`;
-
-export const MediumButton = styled(Button)`
-  padding: 2px 8px;
-`;
-
-export const LargeButton = styled(Button)`
-  padding: 4px 16px;
-`;
+export default memo(Button);

@@ -1,23 +1,13 @@
 import { observer } from "mobx-react-lite";
-import React, { useState } from "react";
-import { Badge, Tab, Tabs } from "react-bootstrap";
+import React from "react";
 import { Filter, FilteredPullRequests } from "../filtering/filters";
 import { Core } from "../state/core";
 import { Loader } from "./Loader";
-import { PullRequestList } from "./PullRequestList";
-import { Status } from "./Status";
-import { isRunningAsPopup } from "../popup-environment";
-import { Link } from "./design/Link";
-import styled from "@emotion/styled";
-import { CopyIcon } from "@primer/octicons-react";
+import PullRequestList from "./PullRequestList";
+import Status from "./Status";
 import { Settings } from "./Settings";
-
-const FullScreenLink = styled(Link)`
-  opacity: 0.7;
-  &:hover {
-    opacity: 1;
-  }
-`;
+import { CopyIcon } from "@primer/octicons-react";
+import { isRunningAsPopup } from "../popup-environment";
 
 export interface PopupProps {
   core: Core;
@@ -31,10 +21,6 @@ export const Popup = observer((props: PopupProps) => {
   const { core } = props;
   const { filteredPullRequests: prs } = core ?? {};
 
-  const [state, setState] = useState<PopupState>({
-    currentFilter: Filter.ALL,
-  });
-
   const onOpen = (pullRequestUrl: string) => {
     core.openPullRequest(pullRequestUrl).catch(console.error);
   };
@@ -43,99 +29,36 @@ export const Popup = observer((props: PopupProps) => {
     return <Loader />;
   }
 
-  return (
-    <>
-      {core.token &&
-        // Don't show the list if there was an error, we're not refreshing
-        // anymore (because of the error) and we don't have any loaded state.
-        !(core.lastError && !core.refreshing && !core.loadedState) && (
-          <div
-            style={{ display: "flex", flexDirection: "column", width: "100%" }}
-          >
-            <div
-              style={{
-                alignItems: "center",
-                display: "flex",
-                justifyContent: "space-between",
-              }}
-            >
-              <Tabs
-                id="popup-tabs"
-                activeKey={state.currentFilter}
-                onSelect={(key) => setState({ currentFilter: key as Filter })}
-              >
-                <Tab
-                  title={
-                    <>
-                      All{" "}
-                      {prs?.needsReview && (
-                        <Badge pill bg="danger">
-                          {prs.needsReview.length}
-                        </Badge>
-                      )}
-                    </>
-                  }
-                  eventKey={Filter.ALL}
-                />
-                <Tab
-                  title={
-                    <>
-                      Needs Review{" "}
-                      {prs?.needsReview && (
-                        <Badge pill bg="danger">
-                          {prs.needsReview.length}
-                        </Badge>
-                      )}
-                    </>
-                  }
-                  eventKey={Filter.NEEDS_REVIEW}
-                />
-                <Tab
-                  title={
-                    <>
-                      Author's Queue{" "}
-                      {prs?.needsRevision && (
-                        <Badge pill bg="secondary">
-                          {prs.needsRevision.length}
-                        </Badge>
-                      )}
-                    </>
-                  }
-                  eventKey={Filter.NEEDS_REVISION}
-                />
-                <Tab
-                  title={
-                    <>
-                      My PRs{" "}
-                      {prs?.mine && (
-                        <Badge bg="secondary">{prs.mine.length}</Badge>
-                      )}
-                    </>
-                  }
-                  eventKey={Filter.MINE}
-                />
-              </Tabs>
-              {isRunningAsPopup() && (
-                <FullScreenLink
-                  target="_blank"
-                  href={`chrome-extension://${chrome.runtime.id}/index.html`}
-                >
-                  <CopyIcon />
-                </FullScreenLink>
-              )}
-            </div>
-            <PullRequests
-              core={core}
-              filter={state.currentFilter}
-              onOpen={onOpen}
-              prs={prs}
-            />
-          </div>
-        )}
-      <div style={{ marginTop: "8px" }}>
+  if (core.lastError) {
+    // Don't show the list if there was an error, we're not refreshing
+    // anymore (because of the error) and we don't have any loaded state.
+    return (
+      <div className="mt-2">
         <Settings core={props.core} />
       </div>
-    </>
+    );
+  }
+
+  return (
+    <div className="flex w-[600px] flex-col">
+      {core.token && (
+        <>
+          {isRunningAsPopup() && (
+            <a
+              target="_blank"
+              href={`chrome-extension://${chrome.runtime.id}/index.html`}
+              rel="noreferrer"
+            >
+              <CopyIcon />
+            </a>
+          )}
+          <PullRequests core={core} onOpen={onOpen} prs={prs} />
+        </>
+      )}
+      <div className="mt-2 flex">
+        <Settings core={props.core} />
+      </div>
+    </div>
   );
 });
 
@@ -156,57 +79,33 @@ function headerForFilter(filter: Filter): string {
 
 function PullRequests({
   core,
-  filter,
   prs,
   onOpen,
 }: {
   core: Core;
-  filter: Filter;
   prs: FilteredPullRequests | null;
   onOpen: (pullRequestUrl: string) => void;
 }): JSX.Element {
-  if (filter === Filter.ALL) {
-    const filters: Array<Filter> = [
-      Filter.NEEDS_REVIEW,
-      Filter.NEEDS_REVISION,
-      Filter.MINE,
-      Filter.RECENTLY_MERGED,
-    ];
-    return (
-      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-        <div style={{ display: "flex" }}>
-          <Status core={core} />
-        </div>
-        {filters.map((filter: Filter, index: number) => {
-          return (
-            <div
-              key={index}
-              style={{ display: "flex", flexDirection: "column", gap: "4px" }}
-            >
-              <div style={{ fontSize: 18 }}>{headerForFilter(filter)}</div>
-              <PullRequestList
-                header={null}
-                pullRequests={prs?.[filter] ?? null}
-                emptyMessage=""
-                onOpen={onOpen}
-              />
-            </div>
-          );
-        })}
-      </div>
-    );
-  }
-
+  const filters: Array<Filter> = [
+    Filter.NEEDS_REVIEW,
+    Filter.NEEDS_REVISION,
+    Filter.MINE,
+    Filter.RECENTLY_MERGED,
+  ];
   return (
-    <PullRequestList
-      header={null}
-      pullRequests={prs?.[filter] ?? null}
-      emptyMessage={
-        filter === Filter.NEEDS_REVIEW
-          ? `Nothing to review, yay!`
-          : `There's nothing to see here.`
-      }
-      onOpen={onOpen}
-    />
+    <div className="flex flex-col gap-3">
+      <Status core={core} />
+      {filters.map((filter: Filter, index: number) => {
+        return (
+          <div className="flex flex-col gap-2" key={index}>
+            <div style={{ fontSize: 18 }}>{headerForFilter(filter)}</div>
+            <PullRequestList
+              pullRequests={prs?.[filter] ?? null}
+              onOpen={onOpen}
+            />
+          </div>
+        );
+      })}
+    </div>
   );
 }

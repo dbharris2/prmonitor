@@ -1,26 +1,7 @@
-import styled from "@emotion/styled";
 import { observer } from "mobx-react-lite";
 import React, { FormEvent, useRef, useState } from "react";
 import { Core } from "../state/core";
-import { LargeButton } from "./design/Button";
-import { Center } from "./design/Center";
-import { Link } from "./design/Link";
-import { Paragraph } from "./design/Paragraph";
-import { Row } from "./design/Row";
-
-const UserLogin = styled.span`
-  color: #000;
-`;
-
-const TokenInput = styled.input`
-  flex-grow: 1;
-  padding: 4px 8px;
-  margin-right: 8px;
-
-  &:focus {
-    outline-color: #2ee59d;
-  }
-`;
+import Button from "./design/Button";
 
 export interface SettingsProps {
   core: Core;
@@ -69,68 +50,59 @@ export const Settings = observer((props: SettingsProps) => {
   };
 
   return (
-    <>
+    <div className="flex w-full flex-col">
       {!editing ? (
         props.core.loadedState ? (
-          <Row>
-            <Paragraph>
+          <div className="flex items-center justify-between">
+            <div>
               Signed in as{" "}
-              <UserLogin>
-                {props.core.loadedState.userLogin || "unknown"}
-              </UserLogin>
-            </Paragraph>
-            <LargeButton onClick={openForm}>Update token</LargeButton>
-          </Row>
+              <span>{props.core.loadedState.userLogin || "unknown"}</span>
+            </div>
+            <Button onClick={openForm}>Update token</Button>
+          </div>
         ) : props.core.lastError ? (
-          <Row>
-            <Paragraph>Is your token valid?</Paragraph>
-            <LargeButton onClick={openForm}>Update token</LargeButton>
-          </Row>
+          <div className="flex items-center justify-between">
+            <div>Is your token valid?</div>
+            <Button onClick={openForm}>Update token</Button>
+          </div>
         ) : props.core.token ? (
-          <Row>
-            <Paragraph>
+          <div className="flex items-center justify-between">
+            <div>
               We're loading your pull requests. This could take a while...
-            </Paragraph>
-            <LargeButton onClick={openForm}>Update token</LargeButton>
-          </Row>
+            </div>
+            <Button onClick={openForm}>Update token</Button>
+          </div>
         ) : (
           <>
-            <Paragraph>
+            <div>
               Welcome to PR Monitor! In order to use this Chrome extension, you
               need to provide a GitHub API token. This will be used to load your
               pull requests.
-            </Paragraph>
-            <Center>
-              <LargeButton onClick={openForm}>Update token</LargeButton>
-            </Center>
+            </div>
+            <div>
+              <Button onClick={openForm}>Update token</Button>
+            </div>
           </>
         )
       ) : (
         <form onSubmit={saveForm}>
           {!props.core.token && (
-            <Paragraph>
+            <div>
               Welcome to PR Monitor! In order to use this Chrome extension, you
               need to provide a GitHub API token. This will be used to load your
               pull requests.
-            </Paragraph>
+            </div>
           )}
-          <Paragraph>
-            Enter a GitHub API token with <b>repo</b> scope (
-            <Link
-              href="https://github.com/settings/tokens/new?description=PR%20Monitor&amp;scopes=repo"
-              target="_blank"
-            >
-              create a new one
-            </Link>
-            ):
-          </Paragraph>
-          <Row>
-            <TokenInput ref={inputRef} />
-            <LargeButton type="submit">Save</LargeButton>
-            <LargeButton onClick={cancelForm}>Cancel</LargeButton>
-          </Row>
+          <div>
+            Enter a GitHub API token with <b>repo</b> scope
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            <input className="mr-2 flex w-full p-2" ref={inputRef} />
+            <Button type="submit">Save</Button>
+            <Button onClick={cancelForm}>Cancel</Button>
+          </div>
         </form>
       )}
-    </>
+    </div>
   );
 });

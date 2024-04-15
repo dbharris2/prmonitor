@@ -49,10 +49,7 @@ export function getLastReviewOrCommentTimestamp(
   return lastCommentedTime;
 }
 
-export function getLastReviewTimestamp(
-  pr: PullRequest,
-  login: string
-): number {
+export function getLastReviewTimestamp(pr: PullRequest, login: string): number {
   let lastReviewedTime = 0;
   for (const review of pr.reviews) {
     if (review.state === "PENDING") {
