@@ -72,15 +72,22 @@ export type PullRequestRet = {
 
 export function buildGitHubApi(token: string): GitHubApi {
   return {
-    async loadAuthenticatedUser(): Promise<any> {
-      const response = await request(`GET /user`, {
+    async loadViewer(): Promise<{ login: string }> {
+      const response = await request("POST /graphql", {
         headers: {
           authorization: `Bearer ${token}`,
         },
-        org: "octokit",
-        type: "private",
+        query: `query Viewer {
+          viewer {
+            login
+          }
+        }`,
+        variables: {
+          login: "octokit",
+        },
       });
-      return response.data;
+
+      return response.data.data.viewer;
     },
     async loadMyOpenPullRequests(): Promise<PullRequestRet> {
       const response = await request("POST /graphql", {

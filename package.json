@@ -1,9 +1,7 @@
 {
   "private": true,
   "dependencies": {
-    "@octokit/plugin-throttling": "^4.3.2",
     "@octokit/request": "^8.1.5",
-    "@octokit/rest": "^19.0.4",
     "@primer/octicons-react": "^19.8.0",
     "graphql": "^16.6.0",
     "graphql-request": "^4.3.0",
