@@ -4,7 +4,6 @@
     "@octokit/request": "^8.1.5",
     "@primer/octicons-react": "^19.8.0",
     "graphql": "^16.6.0",
-    "graphql-request": "^4.3.0",
     "mobx": "^6.6.1",
     "mobx-react-lite": "^3.4.0",
     "moment": "^2.29.4",
