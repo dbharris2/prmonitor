@@ -12,29 +12,50 @@ type Props = {
   isReviewRequested?: boolean;
   isRevisionRequested?: boolean;
   title: string;
-}
+};
 
-const Badge = ({isApproved, isDraft, isMerged, isPending, isReviewRequested, isRevisionRequested, title}: Props) => (
-  <span className={cn("inline-block px-2 py-1 text-xs font-semibold leading-none text-white bg-gray-600 rounded-full", {
-    "bg-green-600": isApproved,
-    "bg-gray-600": isDraft,
-    "bg-purple-500": isMerged,
-    "bg-blue-500": isPending,
-    "bg-orange-400": isReviewRequested,
-    "bg-red-600": isRevisionRequested,
-  })}>
+const Badge = ({
+  isApproved,
+  isDraft,
+  isMerged,
+  isPending,
+  isReviewRequested,
+  isRevisionRequested,
+  title,
+}: Props) => (
+  <span
+    className={cn(
+      "inline-block rounded-full bg-gray-600 px-2 py-1 text-xs font-semibold leading-none text-white",
+      {
+        "bg-green-600": isApproved,
+        "bg-gray-600": isDraft,
+        "bg-purple-500": isMerged,
+        "bg-blue-500": isPending,
+        "bg-orange-400": isReviewRequested,
+        "bg-red-600": isRevisionRequested,
+      }
+    )}
+  >
     {title}
   </span>
 );
 
 const APPROVED = <Badge isApproved key="approved" title="Approved" />;
-const CHANGES_REQUESTED = <Badge isRevisionRequested key="needs-revision" title="Author's Queue" />;
-const CHECK_STATUS_FAILED = <Badge isRevisionRequested key="tests-fail" title="Tests" />;
+const CHANGES_REQUESTED = (
+  <Badge isRevisionRequested key="needs-revision" title="Author's Queue" />
+);
+const CHECK_STATUS_FAILED = (
+  <Badge isRevisionRequested key="tests-fail" title="Tests" />
+);
 const CHECK_STATUS_PASSED = <Badge isApproved key="tests-pass" title="Tests" />;
-const CHECK_STATUS_PENDING = <Badge isRevisionRequested key="tests-pending" title="Tests" />;
+const CHECK_STATUS_PENDING = (
+  <Badge isRevisionRequested key="tests-pending" title="Tests" />
+);
 const DRAFT = <Badge isDraft key="draft" title="Draft" />;
 const MERGED = <Badge isMerged key="merged" title="Merged" />;
-const NEEDS_REVIEW = <Badge isReviewRequested key="needs-review" title="Needs Review" />;
+const NEEDS_REVIEW = (
+  <Badge isReviewRequested key="needs-review" title="Needs Review" />
+);
 
 const PullRequestStatus = ({
   pullRequest,

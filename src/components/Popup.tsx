@@ -6,8 +6,8 @@ import { Loader } from "./Loader";
 import PullRequestList from "./PullRequestList";
 import Status from "./Status";
 import { Settings } from "./Settings";
-import { CopyIcon } from "@primer/octicons-react";
-import { isRunningAsPopup } from "../popup-environment";
+// import { CopyIcon } from "@primer/octicons-react";
+// import { isRunningAsPopup } from "../popup-environment";
 
 export interface PopupProps {
   core: Core;
@@ -30,10 +30,10 @@ export const Popup = observer((props: PopupProps) => {
   }
 
   return (
-    <div className="flex w-[600px] flex-col">
+    <div className="flex flex-col p-2">
       {core.token && (
         <>
-          {isRunningAsPopup() && (
+          {/* {isRunningAsPopup() && (
             <a
               target="_blank"
               href={`chrome-extension://${chrome.runtime.id}/index.html`}
@@ -41,7 +41,7 @@ export const Popup = observer((props: PopupProps) => {
             >
               <CopyIcon />
             </a>
-          )}
+          )} */}
           <PullRequests core={core} onOpen={onOpen} prs={prs} />
         </>
       )}

@@ -37,7 +37,7 @@ core.load().catch(console.error);
 // }
 
 ReactDOM.render(
-  <div className="flex h-screen w-full flex-col items-center bg-slate-50 p-2 font-sans text-sm">
+  <div className="m-auto flex h-screen w-[600px] flex-col bg-slate-50 font-sans text-sm">
     <Popup core={core} />
   </div>,
   document.getElementById("root")
