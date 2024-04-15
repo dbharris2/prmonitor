@@ -16,7 +16,6 @@
     "@babel/preset-env": "^7.18.10",
     "@octokit/core": "^4.0.5",
     "@types/chrome": "^0.0.195",
-    "@types/jest": "^28.1.7",
     "@types/node": "^18.7.10",
     "@types/react": "^18.0.17",
     "@types/react-dom": "^18.0.6",
@@ -32,7 +31,6 @@
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-react": "^7.30.1",
     "html-webpack-plugin": "^5.5.0",
-    "jest": "^28.1.3",
     "postcss": "^8.4.38",
     "postcss-loader": "^8.1.1",
     "prettier": "^3.2.5",
@@ -40,7 +38,6 @@
     "style-loader": "^3.3.1",
     "tailwind-merge": "^2.2.2",
     "tailwindcss": "^3.4.3",
-    "ts-jest": "^28.0.8",
     "ts-loader": "^9.3.1",
     "typescript": "^4.7.4",
     "webpack": "^5.74.0",
@@ -52,7 +49,6 @@
     "start": "webpack serve",
     "watch": "tsc --noEmit --watch",
     "build": "rm -rf dist; webpack --mode production",
-    "test": "jest",
     "lint:check": "eslint \"src/**/*.ts\" \"src/**/*.tsx\"",
     "lint:fix": "eslint --fix \"src/**/*.ts\" \"src/**/*.tsx\""
   }
