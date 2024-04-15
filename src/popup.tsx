@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { chromeApiSingleton } from "./chrome/implementation";
-import { Popup } from "./components/Popup";
+import Popup from "./components/Popup";
 import { buildEnvironment } from "./environment/implementation";
 import { Core } from "./state/core";
 

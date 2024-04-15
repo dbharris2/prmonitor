@@ -1,6 +1,6 @@
 import moment from "moment";
 import React, { memo } from "react";
-import Button from "./design/Button";
+import Button from "./Button";
 import { Core } from "../state/core";
 import { observer } from "mobx-react-lite";
 
