@@ -1,54 +1,40 @@
 import React, { memo } from "react";
-import { Badge } from "react-bootstrap";
 import { EnrichedPullRequest } from "../filtering/enriched-pull-request";
 import { PullRequestState } from "../filtering/status";
 import { CheckStatus } from "../github-api/api";
+import cn from "../cn";
 
-const DRAFT = (
-  <Badge pill bg="dark" key="draft">
-    Draft
-  </Badge>
-);
+type Props = {
+  isApproved?: boolean;
+  isDraft?: boolean;
+  isMerged?: boolean;
+  isPending?: boolean;
+  isReviewRequested?: boolean;
+  isRevisionRequested?: boolean;
+  title: string;
+}
 
-const MERGED = (
-  <Badge pill bg="" style={{ backgroundColor: "#8259DD" }} key="merged">
-    Merged
-  </Badge>
-);
-
-const APPROVED = (
-  <Badge pill bg="success" key="approved">
-    Approved
-  </Badge>
-);
-
-const CHECK_STATUS_PASSED = (
-  <Badge pill bg="success" key="check-status-passed">
-    Tests
-  </Badge>
-);
-const CHECK_STATUS_FAILED = (
-  <Badge pill bg="danger" key="check-status-failed">
-    Tests
-  </Badge>
-);
-const CHECK_STATUS_PENDING = (
-  <Badge pill bg="warning" key="check-status-pending">
-    Tests
-  </Badge>
+const Badge = ({isApproved, isDraft, isMerged, isPending, isReviewRequested, isRevisionRequested, title}: Props) => (
+  <span className={cn("inline-block px-2 py-1 text-xs font-semibold leading-none text-white bg-gray-600 rounded-full", {
+    "bg-green-600": isApproved,
+    "bg-gray-600": isDraft,
+    "bg-purple-500": isMerged,
+    "bg-blue-500": isPending,
+    "bg-orange-400": isReviewRequested,
+    "bg-red-600": isRevisionRequested,
+  })}>
+    {title}
+  </span>
 );
 
-const CHANGES_REQUESTED = (
-  <Badge pill bg="danger" key="changes-requested">
-    Author's Queue
-  </Badge>
-);
-
-const NEEDS_REVIEW = (
-  <Badge pill bg="info" key="waiting-for-review">
-    Needs review
-  </Badge>
-);
+const APPROVED = <Badge isApproved key="approved" title="Approved" />;
+const CHANGES_REQUESTED = <Badge isRevisionRequested key="needs-revision" title="Author's Queue" />;
+const CHECK_STATUS_FAILED = <Badge isRevisionRequested key="tests-fail" title="Tests" />;
+const CHECK_STATUS_PASSED = <Badge isApproved key="tests-pass" title="Tests" />;
+const CHECK_STATUS_PENDING = <Badge isRevisionRequested key="tests-pending" title="Tests" />;
+const DRAFT = <Badge isDraft key="draft" title="Draft" />;
+const MERGED = <Badge isMerged key="merged" title="Merged" />;
+const NEEDS_REVIEW = <Badge isReviewRequested key="needs-review" title="Needs Review" />;
 
 const PullRequestStatus = ({
   pullRequest,
