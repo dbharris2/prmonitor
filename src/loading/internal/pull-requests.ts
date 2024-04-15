@@ -60,7 +60,7 @@ export async function refreshOpenPullRequests(
     ),
     reviewRequests: node.reviewRequests.nodes
       .map(({ requestedReviewer }) => requestedReviewer)
-      .concat(node.participants.nodes),
+      .concat(node.participants.nodes.filter((participant) => participant.login !== viewer.login)),
     reviews: [],
     title: node.title,
     updatedAt: node.updatedAt,
