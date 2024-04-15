@@ -3,11 +3,11 @@ import React, { FormEvent, useRef, useState } from "react";
 import { Core } from "../state/core";
 import Button from "./design/Button";
 
-export interface SettingsProps {
+interface Props {
   core: Core;
 }
 
-export const Settings = observer((props: SettingsProps) => {
+export const Settings = observer(({core}: Props) => {
   const [state, setState] = useState<{
     editing: boolean | "default";
   }>({
@@ -21,7 +21,7 @@ export const Settings = observer((props: SettingsProps) => {
   //   AND the token is not set; or
   // - editing is explicitly set to true (user opened the form).
   const editing =
-    state.editing === "default" ? !props.core.token : state.editing;
+    state.editing === "default" ? !core.token : state.editing;
 
   const openForm = () => {
     setState({
@@ -35,7 +35,7 @@ export const Settings = observer((props: SettingsProps) => {
       return;
     }
     const token = inputRef.current.value;
-    props.core
+    core
       .setNewToken(token)
       .then(() => console.log("GitHub API token updated."));
     setState({
@@ -52,20 +52,20 @@ export const Settings = observer((props: SettingsProps) => {
   return (
     <div className="flex w-full flex-col">
       {!editing ? (
-        props.core.loadedState ? (
+        core.loadedState ? (
           <div className="flex items-center justify-between">
             <div>
               Signed in as{" "}
-              <span>{props.core.loadedState.userLogin || "unknown"}</span>
+              <span>{core.loadedState.userLogin || "unknown"}</span>
             </div>
             <Button onClick={openForm}>Update token</Button>
           </div>
-        ) : props.core.lastError ? (
+        ) : core.lastError ? (
           <div className="flex items-center justify-between">
             <div>Is your token valid?</div>
             <Button onClick={openForm}>Update token</Button>
           </div>
-        ) : props.core.token ? (
+        ) : core.token ? (
           <div className="flex items-center justify-between">
             <div>
               We're loading your pull requests. This could take a while...
@@ -86,7 +86,7 @@ export const Settings = observer((props: SettingsProps) => {
         )
       ) : (
         <form onSubmit={saveForm}>
-          {!props.core.token && (
+          {!core.token && (
             <div>
               Welcome to PR Monitor! In order to use this Chrome extension, you
               need to provide a GitHub API token. This will be used to load your

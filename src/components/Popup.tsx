@@ -1,24 +1,18 @@
 import { observer } from "mobx-react-lite";
-import React from "react";
+import React, { memo } from "react";
 import { Filter, FilteredPullRequests } from "../filtering/filters";
 import { Core } from "../state/core";
-import { Loader } from "./Loader";
 import PullRequestList from "./PullRequestList";
 import Status from "./Status";
 import { Settings } from "./Settings";
 // import { CopyIcon } from "@primer/octicons-react";
 // import { isRunningAsPopup } from "../popup-environment";
 
-export interface PopupProps {
+interface PopupProps {
   core: Core;
 }
 
-export interface PopupState {
-  currentFilter: Filter;
-}
-
-export const Popup = observer((props: PopupProps) => {
-  const { core } = props;
+const Popup = observer(({core}: PopupProps) => {
   const { filteredPullRequests: prs } = core ?? {};
 
   const onOpen = (pullRequestUrl: string) => {
@@ -26,7 +20,7 @@ export const Popup = observer((props: PopupProps) => {
   };
 
   if (core.overallStatus !== "loaded") {
-    return <Loader />;
+    return <div>Loading...</div>;
   }
 
   return (
@@ -46,7 +40,7 @@ export const Popup = observer((props: PopupProps) => {
         </>
       )}
       <div className="mt-2 flex">
-        <Settings core={props.core} />
+        <Settings core={core} />
       </div>
     </div>
   );
@@ -99,3 +93,5 @@ function PullRequests({
     </div>
   );
 }
+
+export default memo(Popup);
