@@ -1,18 +1,10 @@
-import { Octokit } from "@octokit/rest";
-import { GetResponseDataTypeFromEndpointMethod } from "@octokit/types";
 import { PullRequestRet } from "./implementation";
 
 /**
  * A simple wrapper around GitHub's API.
  */
 export interface GitHubApi {
-  /**
-   * Returns the information about the current authenticated user.
-   */
-  loadAuthenticatedUser(): Promise<
-    GetResponseDataTypeFromEndpointMethod<Octokit["users"]["getAuthenticated"]>
-  >;
-
+  loadViewer(): Promise<{ login: string }>;
   loadMyMergedPullRequests(): Promise<PullRequestRet>;
   loadMyOpenPullRequests(): Promise<PullRequestRet>;
   loadNeedsRevisionPullRequests(): Promise<PullRequestRet>;

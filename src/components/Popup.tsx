@@ -29,16 +29,6 @@ export const Popup = observer((props: PopupProps) => {
     return <Loader />;
   }
 
-  if (core.lastError) {
-    // Don't show the list if there was an error, we're not refreshing
-    // anymore (because of the error) and we don't have any loaded state.
-    return (
-      <div className="mt-2">
-        <Settings core={props.core} />
-      </div>
-    );
-  }
-
   return (
     <div className="flex w-[600px] flex-col">
       {core.token && (
