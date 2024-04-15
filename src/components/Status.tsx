@@ -1,66 +1,73 @@
-import styled from "@emotion/styled";
-import { observer } from "mobx-react-lite";
 import moment from "moment";
-import React from "react";
-import { SmallButton } from "./design/Button";
+import React, { memo } from "react";
+import Button from "./design/Button";
 import { Core } from "../state/core";
+import { observer } from "mobx-react-lite";
 
-export interface StatusProps {
+interface StatusProps {
   core: Core;
 }
 
-const StatusContainer = styled.div`
-  background: #fff;
-  flex-grow: 1;
-  border: 1px solid #ddd;
-  border-radius: 0 8px 8px 8px;
-  padding: 12px;
-`;
-
-export const Status = observer((props: StatusProps) => {
-  const { core } = props;
+const Status = observer(({ core }: StatusProps) => {
   const { loadedState } = core ?? {};
 
   return (
-    <StatusContainer style={{ backgroundColor: '#fff', display: 'flex', flexDirection: 'column', width: '100%' }}>
+    <div className="flex w-full flex-col rounded-lg border border-solid border-gray-300 bg-white p-2">
       {core.lastError ? (
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <div>Error: {core.lastError}</div>
+        <div className="flex justify-between">
+          <div className="flex items-center">Error: {core.lastError}</div>
           <LastUpdated timestamp={loadedState?.startRefreshTimestamp} />
-          <Button onClick={() => {core.triggerBackgroundRefresh()}} title="Refresh" /> 
+          <Button
+            onClick={() => {
+              core.triggerBackgroundRefresh();
+            }}
+            title="Refresh"
+          >
+            Refresh
+          </Button>
         </div>
       ) : (
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          {
-            core.refreshing ? 
-              <div style={{ display: 'flex' }}>
-                Refreshing...
-              </div> :
-              <LastUpdated timestamp={loadedState?.startRefreshTimestamp} />
-          }
-          {
-            core.refreshing ? 
-              <Button onClick={() => {core.triggerRestart()}} title="Reload" /> :
-              <Button onClick={() => {core.triggerBackgroundRefresh()}} title="Refresh" />
-          }
+        <div className="flex justify-between">
+          {core.refreshing ? (
+            <div className="flex items-center">Refreshing...</div>
+          ) : (
+            <LastUpdated timestamp={loadedState?.startRefreshTimestamp} />
+          )}
+          {core.refreshing ? (
+            <Button
+              onClick={() => {
+                core.triggerRestart();
+              }}
+              title="Reload"
+            >
+              Reload
+            </Button>
+          ) : (
+            <Button
+              onClick={() => {
+                core.triggerBackgroundRefresh();
+              }}
+              title="Refresh"
+            >
+              Refresh
+            </Button>
+          )}
         </div>
       )}
-    </StatusContainer>
+    </div>
   );
 });
 
-function Button({onClick, title}: {onClick: () => void, title: string}): JSX.Element {
+function LastUpdated({
+  timestamp,
+}: {
+  timestamp: moment.MomentInput;
+}): JSX.Element {
   return (
-    <SmallButton onClick={onClick}>
-      {title}
-    </SmallButton>
-  )
+    <div className="flex items-center">
+      Last updated {moment(timestamp).fromNow()}
+    </div>
+  );
 }
 
-function LastUpdated({timestamp}: {timestamp: moment.MomentInput}): JSX.Element {
-  return (
-    <div>
-      Last updated{' '}{moment(timestamp).fromNow()}
-    </div>
-  )
-}
+export default memo(Status);

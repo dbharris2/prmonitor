@@ -27,6 +27,9 @@ module.exports = {
           {
             loader: "css-loader",
           },
+          {
+            loader: "postcss-loader",
+          },
         ],
       },
     ],
@@ -45,8 +48,8 @@ module.exports = {
   mode: "development",
   devServer: {
     static: {
-        directory: path.join(__dirname, 'public'),
-        watch: true,
+      directory: path.join(__dirname, "public"),
+      watch: true,
     },
     compress: true,
     hot: true,

@@ -1,32 +1,21 @@
-import styled from "@emotion/styled";
 import { observer } from "mobx-react-lite";
-import React from "react";
+import React, { memo } from "react";
 import { EnrichedPullRequest } from "../filtering/enriched-pull-request";
-import { Paragraph } from "./design/Paragraph";
 import { Loader } from "./Loader";
-import { PullRequestItem } from "./PullRequestItem";
+import PullRequestItem from "./PullRequestItem";
 
-const List = styled.div`
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background: #fff;
-`;
-
-export interface PullRequestListProps {
+interface Props {
   pullRequests: EnrichedPullRequest[] | null;
-  emptyMessage: string;
-  header: React.ReactNode;
   onOpen(pullRequestUrl: string): void;
 }
 
-export const PullRequestList = observer((props: PullRequestListProps) => {
+const PullRequestList = observer((props: Props) => {
   return (
-    <List>
-      {props.header}
+    <div className="rounded-lg border border-solid bg-white">
       {props.pullRequests === null ? (
         <Loader />
       ) : props.pullRequests.length === 0 ? (
-        <Paragraph>{props.emptyMessage}</Paragraph>
+        <div className="p-1" />
       ) : (
         <>
           {props.pullRequests.map((pullRequest) => (
@@ -38,6 +27,8 @@ export const PullRequestList = observer((props: PullRequestListProps) => {
           ))}
         </>
       )}
-    </List>
+    </div>
   );
 });
+
+export default memo(PullRequestList);

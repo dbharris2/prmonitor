@@ -7,10 +7,7 @@ export function getFilteredBucket(
   userLogin: string,
   pr: PullRequest
 ) {
-  const filteredPullRequests = filterPullRequests(
-    userLogin,
-    [pr],
-  );
+  const filteredPullRequests = filterPullRequests(userLogin, [pr]);
   const filters: Filter[] = [];
   if (filteredPullRequests.needsReview.length > 0) {
     filters.push(Filter.NEEDS_REVIEW);

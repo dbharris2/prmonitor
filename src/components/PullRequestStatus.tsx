@@ -1,5 +1,4 @@
-import { observer } from "mobx-react-lite";
-import React from "react";
+import React, { memo } from "react";
 import { Badge } from "react-bootstrap";
 import { EnrichedPullRequest } from "../filtering/enriched-pull-request";
 import { PullRequestState } from "../filtering/status";
@@ -51,27 +50,17 @@ const NEEDS_REVIEW = (
   </Badge>
 );
 
-export const PullRequestStatus = observer(
-  ({ pullRequest }: { pullRequest: EnrichedPullRequest }) => {
-    const badges = getBadges(pullRequest.state);
-    if (badges.length > 0) {
-      return (
-        <div
-          style={{
-            alignItems: "center",
-            display: "flex",
-            gap: "4px",
-            justifyContent: "flex-end",
-            maxWidth: "40%",
-          }}
-        >
-          {badges}
-        </div>
-      );
-    }
-    return <></>;
+const PullRequestStatus = ({
+  pullRequest,
+}: {
+  pullRequest: EnrichedPullRequest;
+}) => {
+  const badges = getBadges(pullRequest.state);
+  if (badges.length > 0) {
+    return <div className="flex items-center gap-1">{badges}</div>;
   }
-);
+  return <></>;
+};
 
 function getBadges(state: PullRequestState): JSX.Element[] {
   switch (state.kind) {
@@ -80,7 +69,6 @@ function getBadges(state: PullRequestState): JSX.Element[] {
     case "outgoing":
       return getOutgoingStateBadges(state);
   }
-  return [];
 }
 
 function getCheckStatusBadge(checkStatus?: CheckStatus): JSX.Element[] {
@@ -132,3 +120,5 @@ function getOutgoingStateBadges(state: PullRequestState): JSX.Element[] {
 
   return badges;
 }
+
+export default memo(PullRequestStatus);
