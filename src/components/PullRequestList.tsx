@@ -7,7 +7,7 @@ interface Props {
   onOpen(pullRequestUrl: string): void;
 }
 
-const PullRequestList = ({pullRequests, onOpen}: Props) => {
+const PullRequestList = ({ pullRequests, onOpen }: Props) => {
   return (
     <div className="rounded-lg border border-solid bg-white">
       {pullRequests === null ? (
