@@ -25,7 +25,7 @@ const Badge = ({
 }: Props) => (
   <span
     className={cn(
-      "inline-block rounded-full bg-gray-600 px-2 py-1 text-xs font-semibold leading-none text-white",
+      "inline-block whitespace-nowrap rounded-full bg-gray-600 px-2 py-1 text-xs font-semibold leading-none text-white",
       {
         "bg-green-600": isApproved,
         "bg-gray-600": isDraft,

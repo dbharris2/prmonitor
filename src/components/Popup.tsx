@@ -12,7 +12,7 @@ interface PopupProps {
   core: Core;
 }
 
-const Popup = observer(({core}: PopupProps) => {
+const Popup = observer(({ core }: PopupProps) => {
   const { filteredPullRequests: prs } = core ?? {};
 
   const onOpen = (pullRequestUrl: string) => {

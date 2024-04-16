@@ -7,7 +7,7 @@ interface Props {
   core: Core;
 }
 
-export const Settings = observer(({core}: Props) => {
+export const Settings = observer(({ core }: Props) => {
   const [state, setState] = useState<{
     editing: boolean | "default";
   }>({
@@ -20,8 +20,7 @@ export const Settings = observer(({core}: Props) => {
   // - editing is "default" (user has not said whether they want to open or dismiss the form)
   //   AND the token is not set; or
   // - editing is explicitly set to true (user opened the form).
-  const editing =
-    state.editing === "default" ? !core.token : state.editing;
+  const editing = state.editing === "default" ? !core.token : state.editing;
 
   const openForm = () => {
     setState({
