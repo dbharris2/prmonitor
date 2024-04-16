@@ -26,7 +26,7 @@ const PullRequestItem = ({ onOpen, pullRequest }: Props) => {
             moreThanOneDayAgo(pullRequest.updatedAt),
         },
         {
-          "bg-green-200": pullRequest.state.approved,
+          "bg-green-200": pullRequest.state.approved && !pullRequest.isMerged,
         }
       )}
       key={pullRequest.nodeId}
