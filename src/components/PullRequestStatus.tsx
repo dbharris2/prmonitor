@@ -49,7 +49,7 @@ const CHECK_STATUS_FAILED = (
 );
 const CHECK_STATUS_PASSED = <Badge isApproved key="tests-pass" title="Tests" />;
 const CHECK_STATUS_PENDING = (
-  <Badge isRevisionRequested key="tests-pending" title="Tests" />
+  <Badge isPending key="tests-pending" title="Tests" />
 );
 const DRAFT = <Badge isDraft key="draft" title="Draft" />;
 const MERGED = <Badge isMerged key="merged" title="Merged" />;
