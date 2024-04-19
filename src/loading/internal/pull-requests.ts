@@ -55,13 +55,14 @@ export async function refreshOpenPullRequests(
     repoName: "",
     repoOwner: node.repository.nameWithOwner,
     reviewDecision: node.reviewDecision,
-    reviewRequested: node.reviewRequests.nodes.some(
-      ({ requestedReviewer }) => requestedReviewer.login === viewer.login
-    ),
+    reviewRequested: node.reviewRequests.nodes
+      .filter(Boolean)
+      .some(({ requestedReviewer }) => requestedReviewer?.login === viewer.login),
     reviewRequests: node.reviewRequests.nodes
       .map(({ requestedReviewer }) => requestedReviewer)
       .concat(node.participants.nodes)
-      .filter((reviewer) => reviewer.login !== node.author.login),
+      .filter(Boolean)
+      .filter((reviewer) => reviewer?.login !== node.author.login),
     reviews: [],
     title: node.title,
     updatedAt: node.updatedAt,
