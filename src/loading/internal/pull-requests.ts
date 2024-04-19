@@ -25,7 +25,7 @@ export async function refreshOpenPullRequests(
       (pr) =>
         pr.reviewDecision === "CHANGES_REQUESTED" &&
         pr.reviewRequests.nodes.find(
-          ({ requestedReviewer }) => requestedReviewer.login === viewer.login
+          ({ requestedReviewer }) => requestedReviewer.login !== viewer.login
         )
     ),
     ...myPrs,
