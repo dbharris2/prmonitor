@@ -19,6 +19,13 @@ export async function refreshOpenPullRequests(
   const { prs: needsRevisionPrs } =
     await githubApi.loadNeedsRevisionPullRequests();
 
+  const isReviewFromMeSpecificallyRequested = (pr: PullRequestNode) =>
+    pr.reviewRequests.nodes
+      .filter(Boolean)
+      .some(
+        ({ requestedReviewer }) => requestedReviewer?.login === viewer.login
+      );
+
   return [
     ...toReviewPrs,
     ...needsRevisionPrs.filter(
@@ -26,7 +33,8 @@ export async function refreshOpenPullRequests(
         pr.reviewDecision === "CHANGES_REQUESTED" &&
         pr.reviewRequests.nodes.find(
           ({ requestedReviewer }) => requestedReviewer.login !== viewer.login
-        )
+        ) &&
+        !isReviewFromMeSpecificallyRequested(pr)
     ),
     ...myPrs,
     ...myMergedPrs.filter(
@@ -55,9 +63,7 @@ export async function refreshOpenPullRequests(
     repoName: "",
     repoOwner: node.repository.nameWithOwner,
     reviewDecision: node.reviewDecision,
-    reviewRequested: node.reviewRequests.nodes
-      .filter(Boolean)
-      .some(({ requestedReviewer }) => requestedReviewer?.login === viewer.login),
+    reviewRequested: isReviewFromMeSpecificallyRequested(node),
     reviewRequests: node.reviewRequests.nodes
       .map(({ requestedReviewer }) => requestedReviewer)
       .concat(node.participants.nodes)

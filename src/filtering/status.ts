@@ -6,20 +6,25 @@ import { PullRequest } from "../storage/loaded-state";
  */
 export function pullRequestState(
   pr: PullRequest,
-  currentUserLogin: string
+  viewerLogin: string
 ): PullRequestState {
-  if (pr.author?.login === currentUserLogin) {
+  if (pr.author?.login === viewerLogin) {
     return outgoingPullRequestState(pr);
   }
-  return incomingPullRequestState(pr);
+  return incomingPullRequestState(pr, viewerLogin);
 }
 
-function incomingPullRequestState(pr: PullRequest): PullRequestState {
+function incomingPullRequestState(
+  pr: PullRequest,
+  viewerLogin: string
+): PullRequestState {
   return {
     kind: "incoming",
     draft: pr.draft === true,
     checkStatus: pr.checkStatus,
-    changesRequested: pr.reviewDecision === "CHANGES_REQUESTED",
+    changesRequested:
+      pr.reviewDecision === "CHANGES_REQUESTED" &&
+      !pr.reviewRequests.some((reviewer) => reviewer.login === viewerLogin),
     approved: false,
     isMerged: pr.isMerged,
   };
