@@ -49,9 +49,7 @@ const Popup = observer(({ core }: PopupProps) => {
 function headerForFilter(filter: Filter): string {
   switch (filter) {
     case Filter.NEEDS_REVIEW:
-      return "Needs Review";
-    case Filter.NEEDS_REVISION:
-      return "Author's Queue";
+      return "My Queue";
     case Filter.MINE:
       return "My PRs";
     case Filter.RECENTLY_MERGED:
@@ -72,7 +70,6 @@ function PullRequests({
 }): JSX.Element {
   const filters: Array<Filter> = [
     Filter.NEEDS_REVIEW,
-    Filter.NEEDS_REVISION,
     Filter.MINE,
     Filter.RECENTLY_MERGED,
   ];
