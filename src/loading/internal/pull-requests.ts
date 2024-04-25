@@ -29,12 +29,7 @@ export async function refreshOpenPullRequests(
   return [
     ...toReviewPrs,
     ...needsRevisionPrs.filter(
-      (pr) =>
-        pr.reviewDecision === "CHANGES_REQUESTED" &&
-        pr.reviewRequests.nodes.find(
-          ({ requestedReviewer }) => requestedReviewer.login !== viewer.login
-        ) &&
-        !isReviewFromMeSpecificallyRequested(pr)
+      (pr) => pr.reviewDecision === "CHANGES_REQUESTED"
     ),
     ...myPrs,
     ...myMergedPrs.filter(
