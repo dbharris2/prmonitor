@@ -11,41 +11,39 @@ export function pullRequestState(
   if (pr.author?.login === viewerLogin) {
     return outgoingPullRequestState(pr);
   }
-  return incomingPullRequestState(pr, viewerLogin);
+  return incomingPullRequestState(pr);
 }
 
-function incomingPullRequestState(
-  pr: PullRequest,
-  viewerLogin: string
-): PullRequestState {
+function incomingPullRequestState(pr: PullRequest): PullRequestState {
   return {
-    kind: "incoming",
-    draft: pr.draft === true,
-    checkStatus: pr.checkStatus,
-    changesRequested:
-      pr.reviewDecision === "CHANGES_REQUESTED" &&
-      !pr.reviewRequests.some((reviewer) => reviewer.login === viewerLogin),
     approved: false,
+    draft: pr.draft === true,
+    changesRequested: pr.reviewDecision === "CHANGES_REQUESTED",
+    checkStatus: pr.checkStatus,
+    kind: "incoming",
     isMerged: pr.isMerged,
+    isReviewFromMeSpecificallyRequested: pr.reviewRequested,
   };
 }
 
 function outgoingPullRequestState(pr: PullRequest): PullRequestState {
   return {
-    kind: "outgoing",
-    draft: pr.draft === true,
-    changesRequested: pr.reviewDecision === "CHANGES_REQUESTED",
     approved: pr.reviewDecision === "APPROVED",
+    changesRequested: pr.reviewDecision === "CHANGES_REQUESTED",
     checkStatus: pr.checkStatus,
+    draft: pr.draft === true,
+    kind: "outgoing",
     isMerged: pr.isMerged,
+    isReviewFromMeSpecificallyRequested: false,
   };
 }
 
 export type PullRequestState = {
   approved: boolean;
   changesRequested: boolean;
+  checkStatus?: CheckStatus;
   draft: boolean;
   kind: "incoming" | "outgoing";
   isMerged: boolean;
-  checkStatus?: CheckStatus;
+  isReviewFromMeSpecificallyRequested?: boolean;
 };

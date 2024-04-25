@@ -3,29 +3,37 @@ import { EnrichedPullRequest } from "../filtering/enriched-pull-request";
 import { PullRequestState } from "../filtering/status";
 import { CheckStatus } from "../github-api/api";
 import cn from "../cn";
+import {
+  BeakerIcon,
+  CheckIcon,
+  CodeReviewIcon,
+  FileDiffIcon,
+  GitMergeIcon,
+  GitPullRequestDraftIcon,
+} from "@primer/octicons-react";
 
 type Props = {
+  icon: React.ReactNode;
   isApproved?: boolean;
   isDraft?: boolean;
   isMerged?: boolean;
   isPending?: boolean;
   isReviewRequested?: boolean;
   isRevisionRequested?: boolean;
-  title: string;
 };
 
 const Badge = ({
+  icon,
   isApproved,
   isDraft,
   isMerged,
   isPending,
   isReviewRequested,
   isRevisionRequested,
-  title,
 }: Props) => (
   <span
     className={cn(
-      "inline-block whitespace-nowrap rounded-full bg-gray-600 px-2 py-1 text-xs font-semibold leading-none text-white",
+      "flex items-center whitespace-nowrap rounded-full bg-gray-600 px-2 py-1 text-xs font-semibold leading-none text-white",
       {
         "bg-green-600": isApproved,
         "bg-gray-600": isDraft,
@@ -36,25 +44,27 @@ const Badge = ({
       }
     )}
   >
-    {title}
+    {icon}
   </span>
 );
 
-const APPROVED = <Badge isApproved key="approved" title="Approved" />;
+const APPROVED = <Badge icon={<CheckIcon />} isApproved key="approved" />;
 const CHANGES_REQUESTED = (
-  <Badge isRevisionRequested key="needs-revision" title="Author's Queue" />
+  <Badge icon={<FileDiffIcon />} isRevisionRequested key="needs-revision" />
 );
 const CHECK_STATUS_FAILED = (
-  <Badge isRevisionRequested key="tests-fail" title="Tests" />
+  <Badge icon={<BeakerIcon />} isRevisionRequested key="tests-fail" />
 );
-const CHECK_STATUS_PASSED = <Badge isApproved key="tests-pass" title="Tests" />;
+const CHECK_STATUS_PASSED = (
+  <Badge icon={<BeakerIcon />} isApproved key="tests-pass" />
+);
 const CHECK_STATUS_PENDING = (
-  <Badge isPending key="tests-pending" title="Tests" />
+  <Badge icon={<BeakerIcon />} isPending key="tests-pending" />
 );
-const DRAFT = <Badge isDraft key="draft" title="Draft" />;
-const MERGED = <Badge isMerged key="merged" title="Merged" />;
+const DRAFT = <Badge icon={<GitPullRequestDraftIcon />} isDraft key="draft" />;
+const MERGED = <Badge icon={<GitMergeIcon />} isMerged key="merged" />;
 const NEEDS_REVIEW = (
-  <Badge isReviewRequested key="needs-review" title="Needs Review" />
+  <Badge icon={<CodeReviewIcon />} isReviewRequested key="needs-review" />
 );
 
 const PullRequestStatus = ({
@@ -98,7 +108,11 @@ function getIncomingStateBadges(state: PullRequestState): JSX.Element[] {
 
   if (state.draft) {
     badges.push(DRAFT);
-  } else if (state.changesRequested) {
+  }
+  if (state.isReviewFromMeSpecificallyRequested) {
+    badges.push(NEEDS_REVIEW);
+  }
+  if (state.changesRequested) {
     badges.push(CHANGES_REQUESTED);
   }
 
