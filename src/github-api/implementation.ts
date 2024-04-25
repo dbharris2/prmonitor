@@ -132,7 +132,7 @@ export function buildGitHubApi(token: string): GitHubApi {
         }`,
         variables: {
           login: "octokit",
-          qstr: "-author:@me -is:draft is:open is:pr involves:@me -review:approved",
+          qstr: "-author:@me -is:draft is:open is:pr reviewed-by:@me -review:approved",
         },
       });
 
