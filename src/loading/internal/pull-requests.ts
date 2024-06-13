@@ -26,16 +26,20 @@ export async function refreshOpenPullRequests(
         ({ requestedReviewer }) => requestedReviewer?.login === viewer.login
       );
 
-  return [
+  const prIds = new Set(toReviewPrs.map((pr) => pr.number));
+
+  const prs = [
     ...toReviewPrs,
     ...needsRevisionPrs.filter(
-      (pr) => pr.reviewDecision === "CHANGES_REQUESTED"
+      (pr) => pr.reviewDecision === "CHANGES_REQUESTED" && !prIds.has(pr.number)
     ),
     ...myPrs,
     ...myMergedPrs.filter(
       (pr) => moment().diff(moment(pr.updatedAt), "days") < 1
     ),
-  ].map((node: PullRequestNode, index: { toString: () => any }) => ({
+  ];
+
+  return prs.map((node: PullRequestNode, index: { toString: () => any }) => ({
     author: node.author && {
       avatarUrl: node.author.avatarUrl,
       login: node.author.login,
